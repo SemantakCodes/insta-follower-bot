@@ -4,6 +4,7 @@
 import logging
 import sys
 from api.bot import run_bot
+#yetikai comment
 
 # Setup logging
 logging.basicConfig(
