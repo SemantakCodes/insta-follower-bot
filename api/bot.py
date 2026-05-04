@@ -9,6 +9,7 @@ import random as r
 import time
 import logging
 import os
+import json
 from dotenv import load_dotenv
 from datetime import datetime
 
@@ -21,13 +22,6 @@ logger = logging.getLogger(__name__)
 
 # Load credentials from environment variables
 load_dotenv()
-USERNAME = os.getenv("INSTAGRAM_USERNAME")
-PASSWORD = os.getenv("INSTAGRAM_PASSWORD")
-
-# Validate credentials are set
-if not USERNAME or not PASSWORD:
-    logger.error("Missing INSTAGRAM_USERNAME or INSTAGRAM_PASSWORD in environment variables")
-    raise ValueError("Credentials not configured")
 
 # Configuration
 TAGS = ["pixelart", "gamedev", "indiegame", "pythoncoding"]
@@ -48,10 +42,19 @@ def run_bot():
     """Execute bot interaction logic"""
     client = None
     
+    # Get credentials
+    username = os.getenv("INSTAGRAM_USERNAME")
+    password = os.getenv("INSTAGRAM_PASSWORD")
+    
+    # Validate credentials
+    if not username or not password:
+        logger.error("Missing INSTAGRAM_USERNAME or INSTAGRAM_PASSWORD in environment variables")
+        return {"status": "error", "message": "Credentials not configured"}
+    
     try:
         # Initialize client
         client = Client()
-        client.login(USERNAME, PASSWORD)
+        client.login(username, password)
         logger.info("Successfully logged in to Instagram")
         
         num_interaction_posts = r.randint(1, 5)
@@ -155,30 +158,26 @@ def run_bot():
 def handler(request):
     """
     Handler for Vercel serverless function
-    Triggered by cron jobs
+    Triggered by cron jobs defined in vercel.json
     """
-    # Only allow POST requests
-    if request.method != "POST":
+    try:
+        # Log the request
+        logger.info(f"Bot execution triggered at {datetime.now().isoformat()}")
+        
+        # Run the bot
+        result = run_bot()
+        
+        # Vercel cron jobs expect JSON response
         return {
-            "statusCode": 405,
-            "body": "Method not allowed. Use POST."
+            "statusCode": 200,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps(result)
         }
     
-    # Verify secret token if provided (optional security)
-    token = request.headers.get("x-api-key", "")
-    expected_token = os.getenv("BOT_API_KEY", "")
-    
-    if expected_token and token != expected_token:
-        logger.warning(f"Unauthorized access attempt")
+    except Exception as e:
+        logger.critical(f"Handler error: {e}")
         return {
-            "statusCode": 401,
-            "body": "Unauthorized"
+            "statusCode": 500,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"status": "error", "message": str(e)})
         }
-    
-    logger.info("Bot execution triggered")
-    result = run_bot()
-    
-    return {
-        "statusCode": 200,
-        "body": result
-    }
