@@ -1,9 +1,9 @@
 # Local development script
-# For Vercel deployment, use api/bot.py instead
+# For Vercel deployment, uses api/index.py
 
 import logging
 import sys
-from api.bot import run_bot
+from api.index import run_bot
 #yetikai comment
 
 # Setup logging
