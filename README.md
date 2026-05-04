@@ -52,7 +52,7 @@ Quick overview:
 
 ## Configuration
 
-Edit settings in `api/bot.py`:
+Edit settings in [api/index.py](api/index.py):
 
 ```python
 TAGS = ["pixelart", "gamedev", "indiegame", "pythoncoding"]  # Hashtags to search
@@ -63,13 +63,26 @@ FOLLOW_PROBABILITY = 0.75   # 75% chance to follow
 COMMENT_PROBABILITY = 0.10  # 10% chance to comment
 ```
 
+**Current Bot Behavior:**
+- Runs **8 times daily** (every 3 hours)
+- **7 posts** per run
+- Each post: randomly likes, follows, and/or comments based on probabilities
+
 ## Scheduling
 
-The bot runs on two schedules by default (see `vercel.json`):
-- **9:00 AM UTC** daily
-- **3:00 PM UTC** daily
+The bot runs 8 times per day (see [vercel.json](vercel.json)):
+- **12:00 AM UTC** (Midnight)
+- **3:00 AM UTC**
+- **6:00 AM UTC**
+- **9:00 AM UTC**
+- **12:00 PM UTC** (Noon)
+- **3:00 PM UTC**
+- **6:00 PM UTC**
+- **9:00 PM UTC**
 
-Customize cron schedules in `vercel.json` or `DEPLOYMENT.md`.
+**Total:** 56 interactions per day (8 runs × 7 posts each)
+
+To customize cron schedules, edit [vercel.json](vercel.json) or see [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Project Structure
 
@@ -77,13 +90,14 @@ Customize cron schedules in `vercel.json` or `DEPLOYMENT.md`.
 .
 ├── api/
 │   ├── __init__.py
-│   └── bot.py              # Vercel serverless function
+│   └── index.py            # Flask app for Vercel
 ├── main.py                 # Local development script
 ├── requirements.txt        # Python dependencies
 ├── .env.example            # Credentials template
-├── vercel.json             # Vercel configuration + cron jobs
+├── vercel.json             # Vercel configuration + cron jobs (8x daily)
 ├── README.md               # This file
 ├── DEPLOYMENT.md           # Vercel deployment guide
+├── VERCEL_TROUBLESHOOTING.md  # Troubleshooting tips
 └── .gitignore              # Git ignore rules
 ```
 
@@ -96,9 +110,11 @@ Customize cron schedules in `vercel.json` or `DEPLOYMENT.md`.
 ## ⚠️ Disclaimer
 
 - Use this bot responsibly and in compliance with Instagram's Terms of Service
-- Instagram actively blocks bot activity - your account may be banned
-- Use appropriate delays to avoid rate limiting
-- This is for **educational purposes only**
+- Instagram actively blocks bot activity - **your account may be banned**
+- With 56 daily interactions, Instagram's anti-bot detection will likely trigger
+- Use appropriate delays and lower probabilities to reduce detection risk
+- **This is for educational purposes only**
+- Consider using a dedicated Instagram account (not your personal account)
 - Consider the ethical implications of automation
 
 ## Security

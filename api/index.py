@@ -3,19 +3,15 @@ Vercel serverless function for Instagram bot
 Triggered by cron jobs defined in vercel.json
 """
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, Request
 from instagrapi import Client
 from instagrapi.exceptions import LoginRequired, RateLimitError
 import random as r
 import time
 import logging
 import os
-import json
 from dotenv import load_dotenv
 from datetime import datetime
-
-# Initialize Flask app
-app = Flask(__name__)
 
 # Setup logging
 logging.basicConfig(
@@ -35,6 +31,9 @@ COMMENTS = ["Great work!", "Keep it up", "Nice", ":)"]
 LIKE_PROBABILITY = 0.5
 FOLLOW_PROBABILITY = 0.75
 COMMENT_PROBABILITY = 0.10
+
+# Initialize Flask app
+app = Flask(__name__)
 
 
 def random_delay(min_ms=2000, max_ms=7000):
@@ -57,19 +56,21 @@ def run_bot():
     
     try:
         # Initialize client
+        logger.info("Initializing Instagram client...")
         client = Client()
+        logger.info(f"Logging in as {username}...")
         client.login(username, password)
         logger.info("Successfully logged in to Instagram")
         
-        num_interaction_posts = r.randint(1, 5)
+        num_interaction_posts = 7
+        logger.info(f"Will interact with {num_interaction_posts} posts")
         
         # Search for posts
         random_delay(2000, 7000)
         tag_choice = r.choice(TAGS)
+        logger.info(f"Searching for posts with tag: {tag_choice}")
         hashtag_posts = client.hashtag_medias_recent(tag_choice)
-        
-        logger.info(f"Searched TAG ({tag_choice})")
-        logger.info(f"Proceeding to interact with {num_interaction_posts} posts")
+        logger.info(f"Found {len(hashtag_posts)} posts with tag {tag_choice}")
         
         # Select random posts without duplicates
         num_available = min(num_interaction_posts, len(hashtag_posts))
@@ -78,6 +79,7 @@ def run_bot():
             return {"status": "no_posts", "tag": tag_choice}
         
         chosen_post_indices = r.sample(range(len(hashtag_posts)), num_available)
+        logger.info(f"Selected {num_available} random posts to interact with")
         
         interactions_count = {
             "liked": 0,
@@ -154,6 +156,7 @@ def run_bot():
         if client:
             try:
                 client.logout()
+                logger.info("Logged out from Instagram")
             except Exception as e:
                 logger.warning(f"Error logging out: {e}")
 
@@ -164,12 +167,16 @@ def bot_endpoint():
     """
     HTTP endpoint for cron jobs and manual triggers
     """
+    logger.info("=" * 50)
+    logger.info(f"Bot endpoint called at {datetime.now().isoformat()}")
+    logger.info("=" * 50)
+    
     try:
-        logger.info(f"Bot execution triggered at {datetime.now().isoformat()}")
         result = run_bot()
+        logger.info(f"Bot result: {result}")
         return jsonify(result), 200
     except Exception as e:
-        logger.critical(f"Endpoint error: {e}")
+        logger.critical(f"Endpoint error: {e}", exc_info=True)
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
@@ -177,8 +184,17 @@ def bot_endpoint():
 @app.route("/api/health", methods=["GET"])
 def health():
     """Health check endpoint"""
-    return jsonify({"status": "ok"}), 200
+    logger.info("Health check endpoint called")
+    return jsonify({"status": "ok", "timestamp": datetime.now().isoformat()}), 200
+
+
+# Root endpoint
+@app.route("/", methods=["GET"])
+def root():
+    """Root endpoint"""
+    return jsonify({"message": "FollowerBot is running", "endpoints": {"/api/health": "Health check", "/api/bot": "Run bot"}}), 200
 
 
 if __name__ == "__main__":
-    app.run(debug=False)
+    logger.info("Starting Flask app...")
+    app.run(debug=False, host="0.0.0.0", port=int(os.getenv("PORT", 3000)))
