@@ -4,7 +4,6 @@
     "INSTAGRAM_USERNAME": "@INSTAGRAM_USERNAME",
     "INSTAGRAM_PASSWORD": "@INSTAGRAM_PASSWORD"
   },
-  "envParallel": false,
   "functions": {
     "api/bot.py": {
       "memory": 3008,
