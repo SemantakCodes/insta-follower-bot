@@ -1,10 +1,9 @@
 # Local development script
-# For Vercel deployment, uses api/index.py
+# For Vercel deployment, uses api/index.py (Flask app)
 
 import logging
 import sys
 from api.index import run_bot
-#yetikai comment
 
 # Setup logging
 logging.basicConfig(

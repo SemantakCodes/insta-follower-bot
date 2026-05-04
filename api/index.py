@@ -3,6 +3,7 @@ Vercel serverless function for Instagram bot
 Triggered by cron jobs defined in vercel.json
 """
 
+from flask import Flask, jsonify
 from instagrapi import Client
 from instagrapi.exceptions import LoginRequired, RateLimitError
 import random as r
@@ -12,6 +13,9 @@ import os
 import json
 from dotenv import load_dotenv
 from datetime import datetime
+
+# Initialize Flask app
+app = Flask(__name__)
 
 # Setup logging
 logging.basicConfig(
@@ -154,30 +158,27 @@ def run_bot():
                 logger.warning(f"Error logging out: {e}")
 
 
-# Vercel serverless function handler
-def handler(request):
+# Flask route for cron jobs
+@app.route("/api/bot", methods=["GET", "POST"])
+def bot_endpoint():
     """
-    Handler for Vercel serverless function
-    Triggered by cron jobs defined in vercel.json
+    HTTP endpoint for cron jobs and manual triggers
     """
     try:
-        # Log the request
         logger.info(f"Bot execution triggered at {datetime.now().isoformat()}")
-        
-        # Run the bot
         result = run_bot()
-        
-        # Vercel cron jobs expect JSON response
-        return {
-            "statusCode": 200,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps(result)
-        }
-    
+        return jsonify(result), 200
     except Exception as e:
-        logger.critical(f"Handler error: {e}")
-        return {
-            "statusCode": 500,
-            "headers": {"Content-Type": "application/json"},
-            "body": json.dumps({"status": "error", "message": str(e)})
-        }
+        logger.critical(f"Endpoint error: {e}")
+        return jsonify({"status": "error", "message": str(e)}), 500
+
+
+# Health check endpoint
+@app.route("/api/health", methods=["GET"])
+def health():
+    """Health check endpoint"""
+    return jsonify({"status": "ok"}), 200
+
+
+if __name__ == "__main__":
+    app.run(debug=False)
