@@ -20,7 +20,7 @@ Deployable to **Vercel** with automatic cron-based scheduling ⚡
 
 1. **Clone the repository**
    ```bash
-   git clone <your-repo-url>
+   git clone <https://github.com/SemantakCodes/insta-follower-bot.git>
    cd FollowerBot
    ```
 
@@ -31,7 +31,7 @@ Deployable to **Vercel** with automatic cron-based scheduling ⚡
 
 3. **Set up credentials**
    ```bash
-   cp .env.example .env
+   cp .env .env
    ```
    Edit `.env` with your Instagram credentials
 
@@ -40,15 +40,6 @@ Deployable to **Vercel** with automatic cron-based scheduling ⚡
    python main.py
    ```
 
-### Deploy to Vercel (Recommended)
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for complete Vercel setup instructions.
-
-Quick overview:
-1. Push to GitHub
-2. Connect to Vercel (1 click)
-3. Add environment variables
-4. Bot runs automatically on schedule (cron jobs)
 
 ## Configuration
 
@@ -96,8 +87,6 @@ To customize cron schedules, edit [vercel.json](vercel.json) or see [DEPLOYMENT.
 ├── .env.example            # Credentials template
 ├── vercel.json             # Vercel configuration + cron jobs (8x daily)
 ├── README.md               # This file
-├── DEPLOYMENT.md           # Vercel deployment guide
-├── VERCEL_TROUBLESHOOTING.md  # Troubleshooting tips
 └── .gitignore              # Git ignore rules
 ```
 
@@ -136,7 +125,6 @@ To customize cron schedules, edit [vercel.json](vercel.json) or see [DEPLOYMENT.
 - Increase delay times
 - Schedule fewer runs per day
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for more troubleshooting tips.
 
 ## References
 
